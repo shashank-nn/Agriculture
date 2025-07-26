@@ -277,27 +277,34 @@ COMMODITY_PRICES = {
     "cotton": {"base_price": 0.68, "unit": "per lb", "trend": "rising"},
     "tomatoes": {"base_price": 1.25, "unit": "per lb", "trend": "stable"},
     "potatoes": {"base_price": 0.55, "unit": "per lb", "trend": "falling"},
-    "onions": {"base_price": 0.45, "unit": "per lb", "trend": "stable"}
+    "onions": {"base_price": 0.45, "unit": "per lb", "trend": "stable"},
+    "sugarcane": {"base_price": 0.035, "unit": "per lb", "trend": "rising"},
+    "turmeric": {"base_price": 2.85, "unit": "per lb", "trend": "stable"}
 }
 
 @api_router.get("/market-prices")
 async def get_market_prices():
-    """Get current market prices for agricultural commodities"""
+    """Get current market prices for agricultural commodities in both USD and INR"""
     try:
         prices = []
+        exchange_rate = 83.5  # Current USD to INR rate (can be made dynamic later)
+        
         for commodity, data in COMMODITY_PRICES.items():
             # Simulate price fluctuations
-            base_price = data["base_price"]
+            base_price_usd = data["base_price"]
             fluctuation = random.uniform(-0.15, 0.15)  # ±15% fluctuation
-            current_price = base_price * (1 + fluctuation)
+            current_price_usd = base_price_usd * (1 + fluctuation)
+            current_price_inr = current_price_usd * exchange_rate
             change_percent = fluctuation * 100
             
             market_price = MarketPrice(
                 commodity=commodity,
-                current_price=round(current_price, 2),
+                current_price_usd=round(current_price_usd, 2),
+                current_price_inr=round(current_price_inr, 2),
                 unit=data["unit"],
                 change_percent=round(change_percent, 2),
-                market_trend=data["trend"]
+                market_trend=data["trend"],
+                exchange_rate=exchange_rate
             )
             prices.append(market_price)
             
