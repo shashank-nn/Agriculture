@@ -268,7 +268,296 @@ function App() {
           </div>
         )}
 
-        {/* AI Assistant Tab */}
+        {/* Yield Prediction Tab */}
+        {activeTab === "yield" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">🌾 AI Yield Prediction</h3>
+              
+              {/* Yield Prediction Form */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Crop Type</label>
+                  <select
+                    value={yieldForm.crop_name}
+                    onChange={(e) => setYieldForm({...yieldForm, crop_name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="corn">Corn</option>
+                    <option value="wheat">Wheat</option>
+                    <option value="soybeans">Soybeans</option>
+                    <option value="rice">Rice</option>
+                    <option value="tomatoes">Tomatoes</option>
+                    <option value="potatoes">Potatoes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <input
+                    type="text"
+                    value={yieldForm.location}
+                    onChange={(e) => setYieldForm({...yieldForm, location: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Planting Date</label>
+                  <input
+                    type="date"
+                    value={yieldForm.planting_date}
+                    onChange={(e) => setYieldForm({...yieldForm, planting_date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Field Size (acres)</label>
+                  <input
+                    type="number"
+                    value={yieldForm.field_size}
+                    onChange={(e) => setYieldForm({...yieldForm, field_size: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+              
+              <button
+                onClick={predictYield}
+                disabled={loading}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
+              >
+                {loading ? "Calculating..." : "Predict Yield"}
+              </button>
+
+              {/* Yield Prediction Results */}
+              {yieldPrediction && (
+                <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                  <h4 className="text-xl font-bold text-gray-900 mb-4">📈 Yield Prediction Results</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                      <p className="text-3xl font-bold text-green-600">{yieldPrediction.predicted_yield}</p>
+                      <p className="text-sm text-gray-600">Total Tons</p>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                      <p className="text-3xl font-bold text-blue-600">{yieldPrediction.confidence_score}%</p>
+                      <p className="text-sm text-gray-600">Confidence</p>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                      <p className="text-xl font-bold text-purple-600">{yieldPrediction.crop_name}</p>
+                      <p className="text-sm text-gray-600">Crop Type</p>
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg">
+                    <h5 className="font-semibold mb-2">Key Factors:</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Weather: {yieldPrediction.factors.weather_impact}</li>
+                      <li>• Field Size: {yieldPrediction.factors.field_size}</li>
+                      <li>• Timing: {yieldPrediction.factors.seasonal_timing}</li>
+                      <li>• Location: {yieldPrediction.factors.location_suitability}</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Market Prices Tab */}
+        {activeTab === "market" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">💰 Agricultural Market Prices</h3>
+                <button
+                  onClick={fetchMarketPrices}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                >
+                  Refresh Prices
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {marketPrices.map((price, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-semibold text-gray-900 capitalize">{price.commodity}</h4>
+                      <span className={`text-sm px-2 py-1 rounded-full ${
+                        price.market_trend === 'rising' ? 'bg-green-100 text-green-800' :
+                        price.market_trend === 'falling' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {price.market_trend}
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-600 mb-1">
+                      ${price.current_price}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-2">{price.unit}</div>
+                    <div className={`text-sm font-medium ${
+                      price.change_percent >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {price.change_percent >= 0 ? '↗' : '↘'} {Math.abs(price.change_percent).toFixed(2)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {marketPrices.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">Click "Refresh Prices" to load current market data</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Soil Analysis Tab */}
+        {activeTab === "soil" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">🌱 Soil Health Analysis</h3>
+              
+              {/* Soil Analysis Form */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">pH Level</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={soilForm.ph_level}
+                    onChange={(e) => setSoilForm({...soilForm, ph_level: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="6.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nitrogen (ppm)</label>
+                  <input
+                    type="number"
+                    value={soilForm.nitrogen}
+                    onChange={(e) => setSoilForm({...soilForm, nitrogen: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phosphorus (ppm)</label>
+                  <input
+                    type="number"
+                    value={soilForm.phosphorus}
+                    onChange={(e) => setSoilForm({...soilForm, phosphorus: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Potassium (ppm)</label>
+                  <input
+                    type="number"
+                    value={soilForm.potassium}
+                    onChange={(e) => setSoilForm({...soilForm, potassium: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="150"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Organic Matter (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={soilForm.organic_matter}
+                    onChange={(e) => setSoilForm({...soilForm, organic_matter: parseFloat(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="3.0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Soil Type</label>
+                  <select
+                    value={soilForm.soil_type}
+                    onChange={(e) => setSoilForm({...soilForm, soil_type: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="Clay">Clay</option>
+                    <option value="Loamy">Loamy</option>
+                    <option value="Sandy">Sandy</option>
+                    <option value="Silty">Silty</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <input
+                  type="text"
+                  value={soilForm.location}
+                  onChange={(e) => setSoilForm({...soilForm, location: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  placeholder="Farm location"
+                />
+              </div>
+              
+              <button
+                onClick={analyzeSoil}
+                disabled={loading}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
+              >
+                {loading ? "Analyzing..." : "Analyze Soil"}
+              </button>
+
+              {/* Soil Analysis Results */}
+              {soilAnalysis && (
+                <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-yellow-50 rounded-lg">
+                  <h4 className="text-xl font-bold text-gray-900 mb-4">🌱 Soil Health Report</h4>
+                  
+                  {/* Health Score */}
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="text-center p-6 bg-white rounded-full shadow-lg">
+                      <div className="text-4xl font-bold text-green-600">{soilAnalysis.health_score}</div>
+                      <div className="text-sm text-gray-600">Health Score</div>
+                    </div>
+                  </div>
+
+                  {/* Soil Parameters */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="font-bold text-blue-600">{soilAnalysis.ph_level}</div>
+                      <div className="text-xs text-gray-600">pH Level</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="font-bold text-green-600">{soilAnalysis.nitrogen}</div>
+                      <div className="text-xs text-gray-600">Nitrogen</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="font-bold text-orange-600">{soilAnalysis.phosphorus}</div>
+                      <div className="text-xs text-gray-600">Phosphorus</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="font-bold text-purple-600">{soilAnalysis.potassium}</div>
+                      <div className="text-xs text-gray-600">Potassium</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="font-bold text-yellow-600">{soilAnalysis.organic_matter}%</div>
+                      <div className="text-xs text-gray-600">Organic Matter</div>
+                    </div>
+                  </div>
+
+                  {/* Recommendations */}
+                  <div className="bg-white p-4 rounded-lg">
+                    <h5 className="font-semibold mb-3 text-gray-900">📋 AI Recommendations:</h5>
+                    <div className="space-y-2">
+                      {soilAnalysis.recommendations.map((rec, index) => (
+                        <div key={index} className="flex items-start">
+                          <span className="text-green-500 mr-2">•</span>
+                          <span className="text-sm text-gray-700">{rec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {activeTab === "ai" && (
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-lg p-6">
