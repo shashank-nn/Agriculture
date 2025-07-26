@@ -14,6 +14,26 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [crops, setCrops] = useState([]);
+  
+  // New state for enhanced features
+  const [marketPrices, setMarketPrices] = useState([]);
+  const [yieldPrediction, setYieldPrediction] = useState(null);
+  const [soilAnalysis, setSoilAnalysis] = useState(null);
+  const [yieldForm, setYieldForm] = useState({
+    crop_name: "corn",
+    location: "New York",
+    planting_date: new Date().toISOString().split('T')[0],
+    field_size: 10
+  });
+  const [soilForm, setSoilForm] = useState({
+    ph_level: 6.5,
+    nitrogen: 25,
+    phosphorus: 20,
+    potassium: 150,
+    organic_matter: 3.0,
+    soil_type: "Loamy",
+    location: "New York"
+  });
 
   // Fetch weather and crop suggestions
   const fetchWeatherAndSuggestions = async () => {
@@ -28,6 +48,43 @@ function App() {
       setCropSuggestions(suggestionsResponse.data);
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+    setLoading(false);
+  };
+
+  // Fetch market prices
+  const fetchMarketPrices = async () => {
+    try {
+      const response = await axios.get(`${API}/market-prices`);
+      setMarketPrices(response.data);
+    } catch (error) {
+      console.error('Error fetching market prices:', error);
+    }
+  };
+
+  // Predict yield
+  const predictYield = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API}/yield-prediction`, {
+        ...yieldForm,
+        planting_date: new Date(yieldForm.planting_date).toISOString()
+      });
+      setYieldPrediction(response.data);
+    } catch (error) {
+      console.error('Error predicting yield:', error);
+    }
+    setLoading(false);
+  };
+
+  // Analyze soil
+  const analyzeSoil = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API}/soil-analysis`, soilForm);
+      setSoilAnalysis(response.data);
+    } catch (error) {
+      console.error('Error analyzing soil:', error);
     }
     setLoading(false);
   };
@@ -59,6 +116,7 @@ function App() {
   useEffect(() => {
     fetchWeatherAndSuggestions();
     loadCrops();
+    fetchMarketPrices();
   }, []);
 
   return (
@@ -74,26 +132,38 @@ function App() {
                 className="h-12 w-12 rounded-full object-cover mr-4"
               />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">AgriSmart AI</h1>
-                <p className="text-sm text-gray-600">Your AI-Powered Agriculture Assistant</p>
+                <h1 className="text-2xl font-bold text-gray-900">AgriSmart AI Pro</h1>
+                <p className="text-sm text-gray-600">Complete Farm Management & Analytics Platform</p>
               </div>
             </div>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-6">
               <button
                 onClick={() => setActiveTab("dashboard")}
-                className={`${activeTab === "dashboard" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2`}
+                className={`${activeTab === "dashboard" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2 px-2`}
               >
                 Dashboard
               </button>
               <button
-                onClick={() => setActiveTab("crops")}
-                className={`${activeTab === "crops" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2`}
+                onClick={() => setActiveTab("yield")}
+                className={`${activeTab === "yield" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2 px-2`}
               >
-                My Crops
+                Yield Prediction
+              </button>
+              <button
+                onClick={() => setActiveTab("market")}
+                className={`${activeTab === "market" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2 px-2`}
+              >
+                Market Prices
+              </button>
+              <button
+                onClick={() => setActiveTab("soil")}
+                className={`${activeTab === "soil" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2 px-2`}
+              >
+                Soil Analysis
               </button>
               <button
                 onClick={() => setActiveTab("ai")}
-                className={`${activeTab === "ai" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2`}
+                className={`${activeTab === "ai" ? "text-green-600 border-b-2 border-green-600" : "text-gray-500 hover:text-gray-700"} pb-2 px-2`}
               >
                 AI Assistant
               </button>
@@ -117,10 +187,10 @@ function App() {
               </div>
               <div className="relative px-8 py-16">
                 <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  Smart Farming Starts Here
+                  Advanced Farm Analytics & AI
                 </h2>
                 <p className="text-xl text-gray-600 mb-8">
-                  Get AI-powered crop suggestions based on real-time weather data
+                  Complete farm management with AI-powered insights, yield predictions, market analysis & soil health monitoring
                 </p>
                 
                 {/* Location Input */}
@@ -137,7 +207,7 @@ function App() {
                     disabled={loading}
                     className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
                   >
-                    {loading ? "Loading..." : "Get Suggestions"}
+                    {loading ? "Loading..." : "Update Data"}
                   </button>
                 </div>
               </div>
@@ -180,7 +250,7 @@ function App() {
                     alt="Crops"
                     className="h-12 w-12 rounded-full object-cover mr-4"
                   />
-                  <h3 className="text-2xl font-bold text-gray-900">Recommended Crops</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">AI Crop Recommendations</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {cropSuggestions.map((crop, index) => (
