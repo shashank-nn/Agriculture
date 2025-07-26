@@ -65,6 +65,38 @@ class CropRecord(BaseModel):
     notes: str
     status: str = "planted"
 
+class YieldPrediction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    crop_name: str
+    predicted_yield: float
+    confidence_score: float
+    factors: Dict[str, Any]
+    location: str
+    prediction_date: datetime = Field(default_factory=datetime.utcnow)
+
+class MarketPrice(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    commodity: str
+    current_price: float
+    currency: str = "USD"
+    unit: str = "per bushel"
+    change_percent: float
+    market_trend: str
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+
+class SoilAnalysis(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    ph_level: float
+    nitrogen: float
+    phosphorus: float
+    potassium: float
+    organic_matter: float
+    soil_type: str
+    health_score: float
+    recommendations: List[str]
+    location: str
+    analysis_date: datetime = Field(default_factory=datetime.utcnow)
+
 # Request models
 class LocationRequest(BaseModel):
     location: str
