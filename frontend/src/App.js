@@ -366,47 +366,120 @@ function App() {
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">💰 Agricultural Market Prices</h3>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">💰 Agricultural Market Prices</h3>
+                  <p className="text-sm text-gray-600 mt-1">Live commodity prices in USD & INR</p>
+                </div>
                 <button
                   onClick={fetchMarketPrices}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
                 >
-                  Refresh Prices
+                  🔄 Refresh Prices
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {marketPrices.map((price, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-2">
+                  <div key={index} className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-all duration-200 hover:border-green-300">
+                    <div className="flex items-center justify-between mb-3">
                       <h4 className="text-lg font-semibold text-gray-900 capitalize">{price.commodity}</h4>
-                      <span className={`text-sm px-2 py-1 rounded-full ${
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         price.market_trend === 'rising' ? 'bg-green-100 text-green-800' :
                         price.market_trend === 'falling' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {price.market_trend}
+                        {price.market_trend === 'rising' ? '📈 Rising' : 
+                         price.market_trend === 'falling' ? '📉 Falling' : '➖ Stable'}
                       </span>
                     </div>
-                    <div className="text-2xl font-bold text-green-600 mb-1">
-                      ${price.current_price}
+                    
+                    {/* USD Price */}
+                    <div className="mb-3">
+                      <div className="flex items-baseline justify-between">
+                        <div className="text-2xl font-bold text-blue-600">
+                          ${price.current_price_usd}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">USD</div>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">{price.unit}</div>
-                    <div className={`text-sm font-medium ${
-                      price.change_percent >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {price.change_percent >= 0 ? '↗' : '↘'} {Math.abs(price.change_percent).toFixed(2)}%
+                    
+                    {/* INR Price */}
+                    <div className="mb-3">
+                      <div className="flex items-baseline justify-between">
+                        <div className="text-2xl font-bold text-orange-600">
+                          ₹{price.current_price_inr}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">INR</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 mb-3">{price.unit}</div>
+                    <div className="flex items-center justify-between">
+                      <div className={`text-sm font-medium flex items-center ${
+                        price.change_percent >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {price.change_percent >= 0 ? '↗️' : '↘️'} {Math.abs(price.change_percent).toFixed(2)}%
+                        <span className="ml-1 text-xs">24h</span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Rate: ${price.exchange_rate || '83.5'}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
               {marketPrices.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">Click "Refresh Prices" to load current market data</p>
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">💰</div>
+                  <h4 className="text-xl font-semibold text-gray-700 mb-2">Market Data Loading...</h4>
+                  <p className="text-gray-500 text-lg mb-4">Click "Refresh Prices" to load current market data</p>
+                  <button
+                    onClick={fetchMarketPrices}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                  >
+                    Load Market Prices
+                  </button>
+                </div>
+              )}
+
+              {/* Exchange Rate Info */}
+              {marketPrices.length > 0 && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <span>💱 Exchange Rate: 1 USD = ₹{marketPrices[0]?.exchange_rate || '83.5'} INR</span>
+                    <span>🕒 Last Updated: {new Date().toLocaleTimeString()}</span>
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Market Insights */}
+            {marketPrices.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">📊 Market Insights</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {marketPrices.filter(p => p.market_trend === 'rising').length}
+                    </div>
+                    <div className="text-sm text-gray-600">Commodities Rising</div>
+                  </div>
+                  <div className="p-4 bg-red-50 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">
+                      {marketPrices.filter(p => p.market_trend === 'falling').length}
+                    </div>
+                    <div className="text-sm text-gray-600">Commodities Falling</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-600">
+                      {marketPrices.filter(p => p.market_trend === 'stable').length}
+                    </div>
+                    <div className="text-sm text-gray-600">Stable Prices</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
