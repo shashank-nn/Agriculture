@@ -111,6 +111,21 @@ class CropRecordRequest(BaseModel):
     location: str
     notes: str
 
+class YieldPredictionRequest(BaseModel):
+    crop_name: str
+    location: str
+    planting_date: datetime
+    field_size: float  # in acres
+
+class SoilAnalysisRequest(BaseModel):
+    ph_level: float
+    nitrogen: float
+    phosphorus: float
+    potassium: float
+    organic_matter: float
+    soil_type: str
+    location: str
+
 # API Routes
 @api_router.get("/")
 async def root():
