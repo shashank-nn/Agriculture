@@ -268,6 +268,22 @@ def main():
     
     # 7. Get recent queries
     tester.test_get_recent_queries()
+    
+    # 8. Market Prices (Enhanced Feature - Dual Currency)
+    print("\n🌟 Testing Enhanced Market Prices Feature:")
+    tester.test_market_prices()
+    
+    # 9. Yield Prediction
+    tester.test_yield_prediction()
+    
+    # 10. Soil Analysis
+    tester.test_soil_analysis()
+    
+    # 11. Yield History
+    tester.test_yield_history()
+    
+    # 12. Soil History
+    tester.test_soil_history()
 
     # Print final results
     print("\n" + "=" * 50)
