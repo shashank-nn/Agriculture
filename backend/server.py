@@ -77,11 +77,14 @@ class YieldPrediction(BaseModel):
 class MarketPrice(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     commodity: str
-    current_price: float
-    currency: str = "USD"
+    current_price_usd: float
+    current_price_inr: float
+    currency_usd: str = "USD"
+    currency_inr: str = "INR"
     unit: str = "per bushel"
     change_percent: float
     market_trend: str
+    exchange_rate: float = 83.5  # USD to INR conversion rate
     last_updated: datetime = Field(default_factory=datetime.utcnow)
 
 class SoilAnalysis(BaseModel):
