@@ -123,6 +123,121 @@ class AgricultureAPITester:
             200
         )
 
+    def test_market_prices(self):
+        """Test market prices API with dual currency support"""
+        success, response_data = self.run_test(
+            "Market Prices API (Dual Currency)",
+            "GET",
+            "api/market-prices",
+            200
+        )
+        
+        if success and response_data:
+            print("\n🔍 Validating Market Prices Response:")
+            
+            # Check if response is a list
+            if not isinstance(response_data, list):
+                print("❌ Response should be a list of market prices")
+                return False, {}
+            
+            # Check if we have market prices
+            if len(response_data) == 0:
+                print("❌ No market prices returned")
+                return False, {}
+            
+            print(f"✅ Found {len(response_data)} market prices")
+            
+            # Validate dual currency fields
+            sample_price = response_data[0]
+            required_fields = ['commodity', 'current_price_usd', 'current_price_inr', 'currency_usd', 'currency_inr', 'exchange_rate', 'market_trend', 'unit']
+            
+            for field in required_fields:
+                if field not in sample_price:
+                    print(f"❌ Missing required field: {field}")
+                    return False, {}
+                else:
+                    print(f"✅ Found field: {field} = {sample_price[field]}")
+            
+            # Check for Indian crops
+            commodities = [price['commodity'] for price in response_data]
+            indian_crops = ['sugarcane', 'turmeric']
+            found_indian_crops = [crop for crop in indian_crops if crop in commodities]
+            
+            if found_indian_crops:
+                print(f"✅ Found Indian crops: {found_indian_crops}")
+            else:
+                print(f"⚠️  Indian crops not found. Available commodities: {commodities}")
+            
+            # Validate exchange rate
+            exchange_rate = sample_price.get('exchange_rate', 0)
+            if exchange_rate == 83.5:
+                print(f"✅ Exchange rate is correct: {exchange_rate}")
+            else:
+                print(f"⚠️  Exchange rate might be incorrect: {exchange_rate} (expected 83.5)")
+            
+            # Validate currency symbols
+            if sample_price.get('currency_usd') == 'USD' and sample_price.get('currency_inr') == 'INR':
+                print("✅ Currency codes are correct")
+            else:
+                print(f"⚠️  Currency codes: USD={sample_price.get('currency_usd')}, INR={sample_price.get('currency_inr')}")
+            
+            return True, response_data
+        
+        return success, response_data
+
+    def test_yield_prediction(self):
+        """Test yield prediction API"""
+        yield_data = {
+            "crop_name": "corn",
+            "location": "New York",
+            "planting_date": "2025-03-01T10:00:00",
+            "field_size": 10.0
+        }
+        return self.run_test(
+            "Yield Prediction API",
+            "POST",
+            "api/yield-prediction",
+            200,
+            data=yield_data
+        )
+
+    def test_soil_analysis(self):
+        """Test soil analysis API"""
+        soil_data = {
+            "ph_level": 6.5,
+            "nitrogen": 25.0,
+            "phosphorus": 20.0,
+            "potassium": 150.0,
+            "organic_matter": 3.0,
+            "soil_type": "Loamy",
+            "location": "Test Farm"
+        }
+        return self.run_test(
+            "Soil Analysis API",
+            "POST",
+            "api/soil-analysis",
+            200,
+            data=soil_data
+        )
+
+    def test_yield_history(self):
+        """Test yield history API"""
+        return self.run_test(
+            "Yield History API",
+            "GET",
+            "api/yield-history",
+            200
+        )
+
+    def test_soil_history(self):
+        """Test soil history API"""
+        return self.run_test(
+            "Soil History API",
+            "GET",
+            "api/soil-history",
+            200
+        )
+
 def main():
     print("🌱 Starting Agriculture API Tests...")
     print("=" * 50)
